@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Runner for Verex test suites",
   "main": "run.js",
+  "bin": {
+    "verex": "./run.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
