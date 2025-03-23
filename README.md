@@ -1,123 +1,167 @@
-# Verex AI Test Runner
+# Verex Test Runner
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/verex-ai/verex-runner)](https://github.com/verex-ai/verex-runner/releases)
 [![License](https://img.shields.io/github/license/verex-ai/verex-runner)](https://github.com/verex-ai/verex-runner/blob/main/LICENSE)
 
-Run Verex AI test suites directly using NodeJS.
+A flexible NPM package for running Verex.ai test suites from any CI/CD pipeline, including GitHub Actions, GitLab CI, and Bitbucket Pipelines.
 
 ## Features
 
-- Execute Verex AI test suites from GitHub Actions
-- Automatic polling until test completion
-- Detailed output of test results
-- Simple integration with existing workflows
-- Debug mode for troubleshooting
+- Compatible with multiple CI/CD platforms (GitHub Actions, GitLab CI, Bitbucket Pipelines)
+- Automatic environment detection
+- Configuration via environment variables, CLI arguments, or code
+- Real-time test status updates
+- Detailed test result reporting
+
+## Installation
+
+### Global Installation (recommended for CLI usage)
+
+```bash
+npm install -g @verex/runner
+```
+
+This allows you to run `verex-runner` directly from anywhere.
+
+### Local Installation
+
+```bash
+npm install @verex/runner
+```
 
 ## Usage
 
-Add the following step to your GitHub Actions workflow file:
+### Command Line Interface
 
-```yaml
-- name: Run QA Tests
-  uses: verex-ai/github-test-runner@v1
-  with:
-    api_key: ${{ secrets.VEREX_API_KEY }}
-    test_suite: 'suite_abc123456'
+If installed globally:
+
+```bash
+# Basic usage
+verex-runner --api-key YOUR_API_KEY --test-suite-id YOUR_TEST_SUITE_ID
+
+# With additional options
+verex-runner \
+  --api-key YOUR_API_KEY \
+  --test-suite-id YOUR_TEST_SUITE_ID \
+  --test-base-url https://your-app-domain.com \
+  --max-poll-attempts 120 \
+  --poll-interval-seconds 5 \
+  --debug
 ```
 
-## API Key
+### In Node.js
 
-The API key must be stored in a GitHub secret. You can create a new secret in your repository settings or use the `VEREX_API_KEY` environment variable.
+```javascript
+const { runTests, runTestsWithAutoDetection } = require('@verex/runner');
 
-## Obtaining the API Key
+// Auto-detect CI environment and run tests
+async function runMyTests() {
+  try {
+    const results = await runTestsWithAutoDetection({
+      apiKey: 'YOUR_API_KEY',
+      testSuiteId: 'YOUR_TEST_SUITE_ID',
+      testBaseUrl: 'https://your-app-domain.com'
+    });
+    
+    console.log('Tests completed with status:', results.status);
+    console.log(`${results.passed}/${results.totalTests} tests passed`);
+    
+    // Exit with error code if any tests failed
+    if (results.hasFailed) {
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error('Error running tests:', error);
+    process.exit(1);
+  }
+}
 
-The API key can be found in the [Verex Dashboard](https://verex.ai/app).
-Go to Settings > API Keys and create a new key.
-
-## Complete Example
-
-See [example-workflow.yml](./example-workflow.yml) for a complete example that you can copy and adapt for your own workflows.
-
-```yaml
-# Excerpt from example-workflow.yml
-- name: Run QA Tests
-  uses: verex-ai/github-test-runner@v1
-  with:
-    api_key: ${{ secrets.VEREX_API_KEY }}
-    test_suite: 'testsuite_123456'
-    debug: 'true'
-  id: test_results
-
-- name: Report Test Results
-  if: always()
-  run: |
-    echo "Passed: ${{ steps.test_results.outputs.passed_tests }}"
-    echo "Failed: ${{ steps.test_results.outputs.failed_tests }}"
+runMyTests();
 ```
 
-## Passing a dynamic Base URL to run the tests against
-
-You might want to run the tests against the current branch of your repository.
-
-If you need to pass a dynamic base URL, you can use the `test_base_url` input.
+### GitHub Actions
 
 ```yaml
-test_base_url: ${{ steps.deploy.outputs.deployment_url }}
+name: Verex Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Verex Tests
+        run: npx @verex/runner
+        env:
+          API_KEY: ${{ secrets.VEREX_API_KEY }}
+          TEST_SUITE_ID: ${{ secrets.VEREX_TEST_SUITE_ID }}
+          TEST_BASE_URL: https://staging.your-app.com
+          DEBUG: true
 ```
 
-NOTE: 
-- In the example above, the `steps.deploy.outputs.deployment_url` is a placeholder for the actual deployment URL which will vary depending on the deployment environment.
-- The `test_base_url` input is used to set the base URL for the tests. It is used to replace the `{{base_url}}` placeholder in the test suite.
-## Inputs
+### GitLab CI
 
-| Name | Description | Required | Default |
-|------|-------------|----------|---------|
-| `api_key` | API key for authentication | Yes | |
-| `test_suite` | Test suite ID to execute | Yes | |
-| `test_base_url` | Base URL for the tests (e.g. https://staging.yourdomain.com) | No | |
-| `api_base_url` | Base URL for the API | No | `https://verex.ai/api` |
-| `max_poll_attempts` | Maximum number of polling attempts | No | `60` |
-| `poll_interval_seconds` | Seconds to wait between polling attempts | No | `10` |
-| `timeout_minutes` | Overall timeout for the test run in minutes | No | `30` |
-| `debug` | Enable debug mode | No | `false` |
+```yaml
+stages:
+  - test
 
-## Outputs
+verex-tests:
+  stage: test
+  image: node:16-alpine
+  script:
+    - npm install -g @verex/runner
+    - verex-runner
+  variables:
+    VEREX_API_KEY: $VEREX_API_KEY
+    VEREX_TEST_SUITE_ID: $VEREX_TEST_SUITE_ID
+    VEREX_TEST_BASE_URL: https://staging.your-app.com
+    VEREX_DEBUG: "true"
+```
 
-| Name | Description |
-|------|-------------|
-| `test_suite_run_id` | ID of the test suite run |
-| `test_suite_run_status` | Status of the test suite run |
-| `test_suite_link` | Link to the test suite |
-| `test_suite_run_link` | Link to the test suite run |
-| `total_tests` | Total number of tests executed |
-| `passed_tests` | Number of tests that passed |
-| `failed_tests` | Number of tests that failed |
-| `test_duration` | Total duration of the test run in seconds |
+### Bitbucket Pipelines
 
-## Requirements
+```yaml
+pipelines:
+  default:
+    - step:
+        name: Run Verex Tests
+        image: node:16-alpine
+        script:
+          - npm install -g @verex/runner
+          - verex-runner
+        variables:
+          VEREX_API_KEY: $VEREX_API_KEY
+          VEREX_TEST_SUITE_ID: $VEREX_TEST_SUITE_ID
+          VEREX_TEST_BASE_URL: https://staging.your-app.com
+          VEREX_DEBUG: "true"
+```
 
-- A Verex AI account with API access
-- Valid API key with permissions to run test suites
+## Configuration Options
 
-## Setup
-
-1. Create a new secret in your GitHub repository named `API_KEY` with your Verex AI API key
-2. Add the action to your workflow file as shown in the examples
-3. Configure the inputs according to your needs
-
-## Troubleshooting
-
-If you encounter issues, enable the `debug` option to see more detailed logs. Common issues include:
-
-- Invalid API key
-- Non-existent test suite ID
-- Network connectivity problems
-- Timeouts (increase `timeout_seconds` for longer-running tests)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+| Option | Environment Variable | CLI Argument | Description |
+|--------|---------------------|--------------|-------------|
+| API Key | `API_KEY` (GitHub)<br>`VEREX_API_KEY` (others) | `--api-key` | Verex API key |
+| Test Suite ID | `TEST_SUITE_ID` (GitHub)<br>`VEREX_TEST_SUITE_ID` (others) | `--test-suite-id` | Test suite ID to run |
+| Test Base URL | `TEST_BASE_URL` (GitHub)<br>`VEREX_TEST_BASE_URL` (others) | `--test-base-url` | Base URL for tests |
+| API Base URL | `API_BASE_URL` (GitHub)<br>`VEREX_API_BASE_URL` (others) | `--api-base-url` | Verex API base URL |
+| Max Poll Attempts | `MAX_POLL_ATTEMPTS` (GitHub)<br>`VEREX_MAX_POLL_ATTEMPTS` (others) | `--max-poll-attempts` | Maximum number of polling attempts |
+| Poll Interval | `POLL_INTERVAL_SECONDS` (GitHub)<br>`VEREX_POLL_INTERVAL_SECONDS` (others) | `--poll-interval-seconds` | Interval between polling attempts in seconds |
+| Debug Mode | `DEBUG` (GitHub)<br>`VEREX_DEBUG` (others) | `--debug` | Enable debug logging |
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT
