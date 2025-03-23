@@ -1,22 +1,36 @@
 {
   "name": "@verex/runner",
-  "version": "1.0.0",
-  "description": "Runner for Verex test suites",
-  "main": "run.js",
+  "version": "0.1.0",
+  "description": "Run Verex.ai test suites from any CI/CD pipeline",
+  "main": "src/index.js",
   "bin": {
-    "verex": "./run.js"
+    "verex-runner": "./bin/verex-runner.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "keywords": [
-    "js",
+    "verex",
     "testing",
-    "api"
+    "ci",
+    "cd",
+    "github-actions",
+    "gitlab",
+    "bitbucket"
   ],
-  "author": "Verex",
+  "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.6.2"
+    "axios": "^1.6.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
