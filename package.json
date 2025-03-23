@@ -9,7 +9,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
-    "publish": "npm publish --access public"
+    "push": "git push && git push --tags"
   },
   "keywords": [
     "verex",
