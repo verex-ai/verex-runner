@@ -1,6 +1,7 @@
 # Verex Test Runner
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/verex-ai/verex-runner)](https://github.com/verex-ai/verex-runner/releases)
+[![npm version](https://img.shields.io/npm/v/@verex/runner)](https://www.npmjs.com/package/@verex/runner)
+[![Tests](https://github.com/verex-ai/verex-runner/actions/workflows/tests.yml/badge.svg)](https://github.com/verex-ai/verex-runner/actions/workflows/tests.yml)
 [![License](https://img.shields.io/github/license/verex-ai/verex-runner)](https://github.com/verex-ai/verex-runner/blob/main/LICENSE)
 
 A flexible NPM package for running Verex.ai test suites from any CI/CD pipeline, including GitHub Actions, GitLab CI, and Bitbucket Pipelines.
