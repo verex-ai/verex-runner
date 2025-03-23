@@ -27,15 +27,17 @@ program
   .option("-d, --debug", "Enable debug logging")
   .action(async (options) => {
     try {
-      // Convert CLI options to config format
+      // Convert CLI options to config format, with env var fallbacks
       const config = {
-        apiKey: options.apiKey,
-        testSuiteId: options.testSuiteId,
-        testBaseUrl: options.testBaseUrl,
-        apiBaseUrl: options.apiBaseUrl,
-        maxPollAttempts: options.maxPollAttempts,
-        pollIntervalSeconds: options.pollIntervalSeconds,
-        debug: !!options.debug,
+        apiKey: options.apiKey || process.env.API_KEY,
+        testSuiteId: options.testSuiteId || process.env.TEST_SUITE_ID,
+        testBaseUrl: options.testBaseUrl || process.env.TEST_BASE_URL,
+        apiBaseUrl: options.apiBaseUrl || process.env.API_BASE_URL,
+        maxPollAttempts:
+          options.maxPollAttempts || process.env.MAX_POLL_ATTEMPTS,
+        pollIntervalSeconds:
+          options.pollIntervalSeconds || process.env.POLL_INTERVAL_SECONDS,
+        debug: !!options.debug || process.env.DEBUG === "true",
       };
 
       // Run tests
