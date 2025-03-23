@@ -50,13 +50,15 @@ class GitHubAdapter {
    */
   getConfigFromEnv() {
     return {
-      apiKey: process.env.API_KEY || "",
-      testSuiteId: process.env.TEST_SUITE_ID || "",
-      testBaseUrl: process.env.TEST_BASE_URL || "",
-      apiBaseUrl: process.env.API_BASE_URL || "",
-      maxPollAttempts: parseInt(process.env.MAX_POLL_ATTEMPTS || "60"),
-      pollIntervalSeconds: parseInt(process.env.POLL_INTERVAL_SECONDS || "10"),
-      debug: (process.env.DEBUG || "false").toLowerCase() === "true",
+      apiKey: process.env.VEREX_API_KEY || "",
+      testSuiteId: process.env.VEREX_TEST_SUITE_ID || "",
+      testBaseUrl: process.env.VEREX_TEST_BASE_URL || "",
+      apiBaseUrl: process.env.VEREX_API_BASE_URL || "",
+      maxPollAttempts: parseInt(process.env.VEREX_MAX_POLL_ATTEMPTS || "60"),
+      pollIntervalSeconds: parseInt(
+        process.env.VEREX_POLL_INTERVAL_SECONDS || "10"
+      ),
+      debug: (process.env.VEREX_DEBUG || "false").toLowerCase() === "true",
     };
   }
 }
