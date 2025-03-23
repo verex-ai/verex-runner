@@ -1,6 +1,6 @@
 {
   "name": "@verex/runner",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Run Verex.ai test suites from any CI/CD pipeline",
   "main": "src/index.js",
   "bin": {
