@@ -20,7 +20,7 @@
     "gitlab",
     "bitbucket"
   ],
-  "author": "",
+  "author": "Verex <info@verex.ai>",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.2",
@@ -36,5 +36,13 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/verex-ai/verex-runner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/verex-ai/verex-runner/issues"
+  },
+  "homepage": "https://github.com/verex-ai/verex-runner#readme"
 }
