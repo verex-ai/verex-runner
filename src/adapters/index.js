@@ -1,6 +1,7 @@
 const GitHubAdapter = require("./github");
 const GitLabAdapter = require("./gitlab");
 const BitbucketAdapter = require("./bitbucket");
+const GenericAdapter = require("./generic");
 const { log } = require("../utils/log");
 
 /**
@@ -29,8 +30,9 @@ function createAdapter(options = {}) {
     return bitbucketAdapter;
   }
 
-  log.debug("No CI environment detected");
-  return null;
+  // Fall back to generic adapter if no specific CI environment is detected
+  log.debug("Using generic CI adapter");
+  return new GenericAdapter(options);
 }
 
 /**
@@ -48,6 +50,7 @@ module.exports = {
   GitHubAdapter,
   GitLabAdapter,
   BitbucketAdapter,
+  GenericAdapter,
   createAdapter,
   getConfigFromEnv,
 };

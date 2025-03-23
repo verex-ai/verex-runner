@@ -14,7 +14,9 @@ async function runTests(config, adapter) {
   try {
     validateConfig(config);
     const runner = new VerexTestRunner(config, adapter);
-    return await runner.run();
+    const results = await runner.run();
+    log.info(`Test results: ${JSON.stringify(results, null, 2)}`);
+    return results;
   } catch (error) {
     log.error(`Error running tests: ${error.message}`);
     throw error;
@@ -29,7 +31,7 @@ async function runTests(config, adapter) {
  */
 async function runTestsWithAutoDetection(options = {}) {
   // Auto-detect environment and create adapter
-  const adapter = adapters.createAdapter();
+  const adapter = adapters.createAdapter(options);
 
   // Get config from environment and merge with provided options
   const envConfig = adapter ? adapters.getConfigFromEnv(adapter) : {};

@@ -5,6 +5,16 @@ const { log } = require("./utils/log");
  * VerexTestRunner class to handle test execution
  */
 class VerexTestRunner {
+  // Add status enum at the start of the class
+  static STATUS = {
+    PASSED: "PASSED",
+    FAILED: "FAILED",
+    ERROR: "ERROR",
+    SKIPPED: "SKIPPED",
+    TIMEOUT: "TIMEOUT",
+    COMPLETED: "COMPLETED",
+  };
+
   /**
    * Create a new test runner instance
    *
@@ -145,10 +155,13 @@ class VerexTestRunner {
         `Poll attempt ${attempts}/${this.config.maxPollAttempts}: Status - ${status}`
       );
 
-      if (status === "PASSED") {
+      if (status === VerexTestRunner.STATUS.PASSED) {
         log.debug(`Tests completed: ${status}`);
         return status;
-      } else if (status === "FAILED" || status === "ERROR") {
+      } else if (
+        status === VerexTestRunner.STATUS.FAILED ||
+        status === VerexTestRunner.STATUS.ERROR
+      ) {
         log.error(`Tests failed or encountered an error: ${status}`);
         return status;
       }
@@ -157,7 +170,7 @@ class VerexTestRunner {
     }
 
     log.error(`Timed out after ${attempts} attempts`);
-    return "TIMEOUT";
+    return VerexTestRunner.STATUS.TIMEOUT;
   }
 
   /**
@@ -170,13 +183,13 @@ class VerexTestRunner {
   processResults(testSuiteRun, testRuns) {
     const totalTests = testRuns.length;
     const passed = testRuns.filter(
-      (testRun) => testRun.status === "PASSED"
+      (testRun) => testRun.status === VerexTestRunner.STATUS.PASSED
     ).length;
     const failed = testRuns.filter(
-      (testRun) => testRun.status === "FAILED"
+      (testRun) => testRun.status === VerexTestRunner.STATUS.FAILED
     ).length;
     const skipped = testRuns.filter(
-      (testRun) => testRun.status === "SKIPPED"
+      (testRun) => testRun.status === VerexTestRunner.STATUS.SKIPPED
     ).length;
 
     log.info("\n============ TEST RESULTS ============");
@@ -253,9 +266,12 @@ class VerexTestRunner {
         results.testRuns
       );
 
-      if (testSuiteRunStatus === "PASSED") {
+      if (testSuiteRunStatus === VerexTestRunner.STATUS.PASSED) {
         if (this.adapter) {
-          this.adapter.setOutput("test_status", "COMPLETED");
+          this.adapter.setOutput(
+            "test_status",
+            VerexTestRunner.STATUS.COMPLETED
+          );
         }
         log.info("All tests passed successfully");
       } else {
@@ -263,7 +279,10 @@ class VerexTestRunner {
           `Tests failed or encountered an error: ${testSuiteRunStatus}`
         );
         if (this.adapter) {
-          this.adapter.setOutput("test_status", testSuiteRunStatus || "FAILED");
+          this.adapter.setOutput(
+            "test_status",
+            testSuiteRunStatus || VerexTestRunner.STATUS.FAILED
+          );
         }
         // Don't throw here, let the caller decide what to do based on the results
       }
@@ -273,12 +292,13 @@ class VerexTestRunner {
         runId,
         testSuiteRunStatus,
         hasFailed:
-          processedResults.failed > 0 || testSuiteRunStatus !== "PASSED",
+          processedResults.failed > 0 ||
+          testSuiteRunStatus !== VerexTestRunner.STATUS.PASSED,
       };
     } catch (error) {
       log.error(`Error executing tests: ${error}`);
       if (this.adapter) {
-        this.adapter.setOutput("test_status", "ERROR");
+        this.adapter.setOutput("test_status", VerexTestRunner.STATUS.ERROR);
       }
       throw error;
     }
