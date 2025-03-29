@@ -65,13 +65,13 @@ describe("GitHubAdapter", () => {
     });
 
     it("should return values from environment variables", () => {
-      process.env.API_KEY = "test-key";
-      process.env.TEST_SUITE_ID = "test-suite";
-      process.env.TEST_BASE_URL = "http://test.com";
-      process.env.API_BASE_URL = "http://api.test.com";
-      process.env.MAX_POLL_ATTEMPTS = "30";
-      process.env.POLL_INTERVAL_SECONDS = "5";
-      process.env.DEBUG = "true";
+      process.env.VEREX_API_KEY = "test-key";
+      process.env.VEREX_TEST_SUITE_ID = "test-suite";
+      process.env.VEREX_TEST_BASE_URL = "http://test.com";
+      process.env.VEREX_API_BASE_URL = "http://api.test.com";
+      process.env.VEREX_MAX_POLL_ATTEMPTS = "30";
+      process.env.VEREX_POLL_INTERVAL_SECONDS = "5";
+      process.env.VEREX_DEBUG = "true";
 
       const config = adapter.getConfigFromEnv();
       expect(config).toEqual({
