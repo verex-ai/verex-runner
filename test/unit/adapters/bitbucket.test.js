@@ -1,13 +1,26 @@
 // GitHub adapter tests
 
 const BitbucketAdapter = require("../../../src/adapters/bitbucket");
+const fs = require("fs");
+
+// Mock fs module
+jest.mock("fs", () => ({
+  appendFileSync: jest.fn(),
+}));
 
 describe("BitbucketAdapter", () => {
   let adapter;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     delete process.env.BITBUCKET_BUILD_NUMBER;
-    delete process.env.VEREX_API_KEY;
+    delete process.env.BITBUCKET_OUTPUT;
+    // delete all env vars that start with VEREX_
+    Object.keys(process.env).forEach((key) => {
+      if (key.startsWith("VEREX_")) {
+        delete process.env[key];
+      }
+    });
     adapter = new BitbucketAdapter();
   });
 
@@ -22,15 +35,22 @@ describe("BitbucketAdapter", () => {
     });
   });
 
-  describe("setOutput and getOutputs", () => {
-    it("should store and retrieve outputs", () => {
-      adapter.setOutput("key1", "value1");
-      adapter.setOutput("key2", "value2");
+  describe("setOutput", () => {
+    it("should write to BITBUCKET_OUTPUT file when available", () => {
+      process.env.BITBUCKET_OUTPUT = "/path/to/output";
+      adapter = new BitbucketAdapter();
 
-      expect(adapter.getOutputs()).toEqual({
-        key1: "value1",
-        key2: "value2",
-      });
+      adapter.setOutput("key", "value");
+
+      expect(fs.appendFileSync).toHaveBeenCalledWith(
+        "/path/to/output",
+        "key=value\n"
+      );
+    });
+
+    it("should not write when BITBUCKET_OUTPUT is not set", () => {
+      adapter.setOutput("key", "value");
+      expect(fs.appendFileSync).not.toHaveBeenCalled();
     });
   });
 
@@ -45,6 +65,7 @@ describe("BitbucketAdapter", () => {
         maxPollAttempts: 60,
         pollIntervalSeconds: 10,
         debug: false,
+        outputFile: "",
       });
     });
 
@@ -56,6 +77,7 @@ describe("BitbucketAdapter", () => {
       process.env.VEREX_MAX_POLL_ATTEMPTS = "30";
       process.env.VEREX_POLL_INTERVAL_SECONDS = "5";
       process.env.VEREX_DEBUG = "true";
+      process.env.VEREX_OUTPUT_FILE = "test-output.txt";
 
       const config = adapter.getConfigFromEnv();
       expect(config).toEqual({
@@ -66,6 +88,7 @@ describe("BitbucketAdapter", () => {
         maxPollAttempts: 30,
         pollIntervalSeconds: 5,
         debug: true,
+        outputFile: "test-output.txt",
       });
     });
   });

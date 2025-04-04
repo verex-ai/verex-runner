@@ -12,11 +12,15 @@ describe("GitHubAdapter", () => {
   let adapter;
 
   beforeEach(() => {
-    // Clear all environment variables and mocks before each test
     jest.clearAllMocks();
     delete process.env.GITHUB_ACTIONS;
     delete process.env.GITHUB_OUTPUT;
-    delete process.env.API_KEY;
+    // delete all env vars that start with VEREX_
+    Object.keys(process.env).forEach((key) => {
+      if (key.startsWith("VEREX_")) {
+        delete process.env[key];
+      }
+    });
     adapter = new GitHubAdapter();
   });
 
@@ -61,6 +65,7 @@ describe("GitHubAdapter", () => {
         maxPollAttempts: 60,
         pollIntervalSeconds: 10,
         debug: false,
+        outputFile: "",
       });
     });
 
@@ -72,6 +77,7 @@ describe("GitHubAdapter", () => {
       process.env.VEREX_MAX_POLL_ATTEMPTS = "30";
       process.env.VEREX_POLL_INTERVAL_SECONDS = "5";
       process.env.VEREX_DEBUG = "true";
+      process.env.VEREX_OUTPUT_FILE = "test-output.txt";
 
       const config = adapter.getConfigFromEnv();
       expect(config).toEqual({
@@ -82,6 +88,7 @@ describe("GitHubAdapter", () => {
         maxPollAttempts: 30,
         pollIntervalSeconds: 5,
         debug: true,
+        outputFile: "test-output.txt",
       });
     });
   });

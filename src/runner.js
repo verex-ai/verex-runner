@@ -26,6 +26,7 @@ class VerexTestRunner {
    * @param {number} [config.maxPollAttempts] - Maximum number of polling attempts
    * @param {number} [config.pollIntervalSeconds] - Interval between polling attempts in seconds
    * @param {boolean} [config.debug] - Enable debug logging
+   * @param {string} [config.outputFile] - File to write output to
    * @param {Object} adapter - CI/CD platform adapter
    */
   constructor(config, adapter) {
@@ -37,6 +38,7 @@ class VerexTestRunner {
       maxPollAttempts: config.maxPollAttempts || 60,
       pollIntervalSeconds: config.pollIntervalSeconds || 10,
       debug: config.debug || false,
+      outputFile: config.outputFile || "",
     };
 
     this.adapter = adapter;

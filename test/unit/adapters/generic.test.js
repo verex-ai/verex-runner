@@ -6,11 +6,18 @@ describe("GenericAdapter", () => {
   let adapter;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     // Clear relevant environment variables
     delete process.env.CI;
     delete process.env.BUILD_NUMBER;
     delete process.env.CI_BRANCH;
     delete process.env.CI_COMMIT_SHA;
+    // delete all env vars that start with VEREX_
+    Object.keys(process.env).forEach((key) => {
+      if (key.startsWith("VEREX_")) {
+        delete process.env[key];
+      }
+    });
     adapter = new GenericAdapter();
   });
 
@@ -52,6 +59,14 @@ describe("GenericAdapter", () => {
         commit: undefined,
         repository: undefined,
         buildNumber: undefined,
+        apiKey: "",
+        testSuiteId: "",
+        testBaseUrl: "",
+        apiBaseUrl: "",
+        maxPollAttempts: 60,
+        pollIntervalSeconds: 10,
+        debug: false,
+        outputFile: "",
       });
     });
 
@@ -67,6 +82,14 @@ describe("GenericAdapter", () => {
         commit: "abc123",
         repository: "repo/name",
         buildNumber: "123",
+        apiKey: "",
+        testSuiteId: "",
+        testBaseUrl: "",
+        apiBaseUrl: "",
+        maxPollAttempts: 60,
+        pollIntervalSeconds: 10,
+        debug: false,
+        outputFile: "",
       });
     });
 

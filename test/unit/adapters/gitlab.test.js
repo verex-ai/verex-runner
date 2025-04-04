@@ -1,13 +1,26 @@
 // GitHub adapter tests
 
 const GitLabAdapter = require("../../../src/adapters/gitlab");
+const fs = require("fs");
+
+// Mock fs module
+jest.mock("fs", () => ({
+  appendFileSync: jest.fn(),
+}));
 
 describe("GitLabAdapter", () => {
   let adapter;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     delete process.env.GITLAB_CI;
-    delete process.env.VEREX_API_KEY;
+    delete process.env.GITLAB_OUTPUT;
+    // delete all env vars that start with VEREX_
+    Object.keys(process.env).forEach((key) => {
+      if (key.startsWith("VEREX_")) {
+        delete process.env[key];
+      }
+    });
     adapter = new GitLabAdapter();
   });
 
@@ -22,15 +35,22 @@ describe("GitLabAdapter", () => {
     });
   });
 
-  describe("setOutput and getOutputs", () => {
-    it("should store and retrieve outputs", () => {
-      adapter.setOutput("key1", "value1");
-      adapter.setOutput("key2", "value2");
+  describe("setOutput", () => {
+    it("should write to GITLAB_OUTPUT file when available", () => {
+      process.env.GITLAB_OUTPUT = "/path/to/output";
+      adapter = new GitLabAdapter();
 
-      expect(adapter.getOutputs()).toEqual({
-        key1: "value1",
-        key2: "value2",
-      });
+      adapter.setOutput("key", "value");
+
+      expect(fs.appendFileSync).toHaveBeenCalledWith(
+        "/path/to/output",
+        "key=value\n"
+      );
+    });
+
+    it("should not write when GITLAB_OUTPUT is not set", () => {
+      adapter.setOutput("key", "value");
+      expect(fs.appendFileSync).not.toHaveBeenCalled();
     });
   });
 
@@ -45,6 +65,7 @@ describe("GitLabAdapter", () => {
         maxPollAttempts: 60,
         pollIntervalSeconds: 10,
         debug: false,
+        outputFile: "",
       });
     });
 
@@ -56,6 +77,7 @@ describe("GitLabAdapter", () => {
       process.env.VEREX_MAX_POLL_ATTEMPTS = "30";
       process.env.VEREX_POLL_INTERVAL_SECONDS = "5";
       process.env.VEREX_DEBUG = "true";
+      process.env.VEREX_OUTPUT_FILE = "test-output.txt";
 
       const config = adapter.getConfigFromEnv();
       expect(config).toEqual({
@@ -66,6 +88,7 @@ describe("GitLabAdapter", () => {
         maxPollAttempts: 30,
         pollIntervalSeconds: 5,
         debug: true,
+        outputFile: "test-output.txt",
       });
     });
   });
