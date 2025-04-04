@@ -10,7 +10,7 @@ class BitbucketAdapter {
    * @param {Object} [options] - Adapter options
    */
   constructor(options = {}) {
-    this.outputs = {};
+    this.outputFile = options.outputFile || process.env.BITBUCKET_OUTPUT;
     log.debug("Bitbucket adapter initialized");
   }
 
@@ -30,17 +30,14 @@ class BitbucketAdapter {
    * @param {string} value - Output value
    */
   setOutput(name, value) {
-    this.outputs[name] = value;
-    log.debug(`Setting Bitbucket output ${name}=${value}`);
-  }
-
-  /**
-   * Get all outputs
-   *
-   * @returns {Object} All outputs
-   */
-  getOutputs() {
-    return this.outputs;
+    if (this.outputFile) {
+      log.debug(`Setting Bitbucket output ${name}=${value}`);
+      fs.appendFileSync(this.outputFile, `${name}=${value}\n`);
+    } else {
+      log.debug(
+        `Would set Bitbucket output ${name}=${value} if config.outputFile or BITBUCKET_OUTPUT was set`
+      );
+    }
   }
 
   /**
@@ -59,6 +56,7 @@ class BitbucketAdapter {
         process.env.VEREX_POLL_INTERVAL_SECONDS || "10"
       ),
       debug: (process.env.VEREX_DEBUG || "false").toLowerCase() === "true",
+      outputFile: process.env.VEREX_OUTPUT_FILE || "",
     };
   }
 }

@@ -11,7 +11,7 @@ class GitHubAdapter {
    * @param {Object} [options] - Adapter options
    */
   constructor(options = {}) {
-    this.outputFile = process.env.GITHUB_OUTPUT;
+    this.outputFile = options.outputFile || process.env.GITHUB_OUTPUT;
     log.debug(
       `GitHub adapter initialized. Output file: ${this.outputFile || "not set"}`
     );
@@ -38,7 +38,7 @@ class GitHubAdapter {
       fs.appendFileSync(this.outputFile, `${name}=${value}\n`);
     } else {
       log.debug(
-        `Would set GitHub output ${name}=${value} if GITHUB_OUTPUT was set`
+        `Would set GitHub output ${name}=${value} if config.outputFile or GITHUB_OUTPUT was set`
       );
     }
   }
@@ -59,6 +59,7 @@ class GitHubAdapter {
         process.env.VEREX_POLL_INTERVAL_SECONDS || "10"
       ),
       debug: (process.env.VEREX_DEBUG || "false").toLowerCase() === "true",
+      outputFile: process.env.VEREX_OUTPUT_FILE || "",
     };
   }
 }

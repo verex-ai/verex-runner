@@ -35,6 +35,7 @@ function loadConfig(options = {}) {
       (cli.debug || env.debug || file.debug || "false")
         .toString()
         .toLowerCase() === "true",
+    outputFile: cli.outputFile || env.outputFile || file.outputFile || "",
   };
 }
 

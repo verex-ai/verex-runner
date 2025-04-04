@@ -10,7 +10,7 @@ class GitLabAdapter {
    * @param {Object} [options] - Adapter options
    */
   constructor(options = {}) {
-    this.outputs = {};
+    this.outputFile = options.outputFile || process.env.GITLAB_OUTPUT;
     log.debug("GitLab adapter initialized");
   }
 
@@ -32,17 +32,14 @@ class GitLabAdapter {
    * @param {string} value - Output value
    */
   setOutput(name, value) {
-    this.outputs[name] = value;
-    log.debug(`Setting GitLab output ${name}=${value}`);
-  }
-
-  /**
-   * Get all outputs
-   *
-   * @returns {Object} All outputs
-   */
-  getOutputs() {
-    return this.outputs;
+    if (this.outputFile) {
+      log.debug(`Setting GitLab output ${name}=${value}`);
+      fs.appendFileSync(this.outputFile, `${name}=${value}\n`);
+    } else {
+      log.debug(
+        `Would set GitLab output ${name}=${value} if config.outputFile or GITLAB_OUTPUT was set`
+      );
+    }
   }
 
   /**
@@ -61,6 +58,7 @@ class GitLabAdapter {
         process.env.VEREX_POLL_INTERVAL_SECONDS || "10"
       ),
       debug: (process.env.VEREX_DEBUG || "false").toLowerCase() === "true",
+      outputFile: process.env.VEREX_OUTPUT_FILE || "",
     };
   }
 }
